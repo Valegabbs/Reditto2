@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, History, TrendingUp, BookOpen, Moon, Sun, X } from 'lucide-react';
+import { Home, History, TrendingUp, BookOpen, Moon, Sun, X, GraduationCap } from 'lucide-react';
 import { Tab, UserProfile, KnowledgeArea } from '../types';
 import Logo from './Logo';
 
@@ -52,6 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems = [
     { id: Tab.HOME, label: 'Início', icon: Home, tourId: 'tour-menu-home' },
+    { id: Tab.APP, label: 'Estudos (App)', icon: GraduationCap },
     { id: Tab.HISTORY, label: 'Histórico', icon: History, tourId: 'tour-menu-history' },
     { id: Tab.EVOLUTION, label: 'Evolução', icon: TrendingUp },
     { id: Tab.THEMES, label: 'Temas (Redação)', icon: BookOpen },

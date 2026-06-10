@@ -10,6 +10,18 @@ import EvolutionChart from './components/EvolutionChart';
 import ThemeSuggestions from './components/ThemeSuggestions';
 import LoadingPage from './components/LoadingPage';
 import ResultsPage from './components/ResultsPage';
+
+// Public SEO and compliance pages for Google AdSense
+import LandingPage from './components/LandingPage';
+import ComoFunciona from './components/ComoFunciona';
+import FAQ from './components/FAQ';
+import AboutUs from './components/AboutUs';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfUse from './components/TermsOfUse';
+import Contact from './components/Contact';
+import Blog from './components/Blog';
+import Footer from './components/Footer';
+
 import { Tab, EssaySubmission, HistoryItem, KnowledgeArea, UserProfile, EssayCorrection, TutoringResponse } from './types';
 import { correctEssayWithGemini, correctTutoringWithGemini } from './services/geminiService';
 import { CheckCircle2, AlertCircle, Menu, ChevronRight } from 'lucide-react';
@@ -17,12 +29,74 @@ import Logo from './components/Logo';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.HOME);
+  const [blogPostSlug, setBlogPostSlug] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedEssay, setSelectedEssay] = useState<HistoryItem | null>(null);
   
   const [hubKey, setHubKey] = useState(0);
+
+  // Synchronize state with URL pathname or hash (ideal for Google AdSense crawler indexing)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const path = window.location.pathname;
+      const hash = window.location.hash;
+      const current = path !== '/' ? path : hash.replace('#', '');
+      
+      if (current === '/politica-de-privacidade' || current === 'politica-de-privacidade') {
+        setActiveTab(Tab.POLITICA_PRIVACIDADE);
+      } else if (current === '/termos-de-uso' || current === 'termos-de-uso') {
+        setActiveTab(Tab.TERMOS_USO);
+      } else if (current === '/sobre-nos' || current === 'sobre-nos') {
+        setActiveTab(Tab.SOBRE_NOS);
+      } else if (current === '/contato' || current === 'contato') {
+        setActiveTab(Tab.CONTATO);
+      } else if (current === '/como-funciona' || current === 'como-funciona') {
+        setActiveTab(Tab.COMO_FUNCIONA);
+      } else if (current === '/faq' || current === 'faq') {
+        setActiveTab(Tab.FAQ);
+      } else if (current === '/blog' || current === 'blog') {
+        setActiveTab(Tab.BLOG);
+      } else if (current.startsWith('/blog/') || current.startsWith('blog/')) {
+        const slug = current.replace('/blog/', '').replace('blog/', '');
+        setActiveTab(Tab.BLOG_POST);
+        setBlogPostSlug(slug);
+      } else if (current === '/app' || current === 'app') {
+        setActiveTab(Tab.APP);
+      } else {
+        setActiveTab(Tab.HOME); // Multi-rich public landing page
+      }
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    handleLocationChange();
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const navigateTo = (tab: Tab, slug?: string) => {
+    let url = '/';
+    if (tab === Tab.POLITICA_PRIVACIDADE) url = '/politica-de-privacidade';
+    else if (tab === Tab.TERMOS_USO) url = '/termos-de-uso';
+    else if (tab === Tab.SOBRE_NOS) url = '/sobre-nos';
+    else if (tab === Tab.CONTATO) url = '/contato';
+    else if (tab === Tab.COMO_FUNCIONA) url = '/como-funciona';
+    else if (tab === Tab.FAQ) url = '/faq';
+    else if (tab === Tab.BLOG) url = '/blog';
+    else if (tab === Tab.BLOG_POST && slug) url = `/blog/${slug}`;
+    else if (tab === Tab.APP) url = '/app';
+    else if (tab === Tab.HOME) url = '/';
+
+    window.history.pushState({}, '', url);
+    setActiveTab(tab);
+    if (slug) setBlogPostSlug(slug);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   // User Profile State
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
@@ -183,7 +257,7 @@ const App: React.FC = () => {
     setCurrentTopic(theme);
     setSelectedArea(KnowledgeArea.REDACAO);
     setSelectedSubject('Redação');
-    setActiveTab(Tab.HOME);
+    navigateTo(Tab.APP);
     setNotification({ type: 'success', message: 'Tema selecionado! Boa escrita.' });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -235,20 +309,28 @@ const App: React.FC = () => {
 
   const handleStartTour = () => {
     setShowWelcome(false);
-    // Ensure we are on home tab for the tour to work correctly
-    setActiveTab(Tab.HOME);
+    // Ensure we are on app workspace tab for the tour to work correctly
+    navigateTo(Tab.APP);
     // Wait a brief moment for render
     setTimeout(() => setShowTour(true), 100);
   };
 
   const handleHistorySelect = (essay: HistoryItem) => {
     setSelectedEssay(essay);
-    setActiveTab(Tab.RESULTS);
+    navigateTo(Tab.RESULTS);
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case Tab.HOME:
+        return (
+          <LandingPage 
+            onEnterApp={() => navigateTo(Tab.APP)} 
+            onNavigate={navigateTo} 
+          />
+        );
+
+      case Tab.APP:
         if (!selectedSubject) {
           return <Hub key={hubKey} onSelectSubject={handleSelectSubject} onAreaChange={setSelectedArea} />;
         }
@@ -300,14 +382,49 @@ const App: React.FC = () => {
 
       case Tab.RESULTS:
         if (!selectedEssay) {
-          setActiveTab(Tab.HOME);
+          navigateTo(Tab.APP);
           return null;
         }
         return (
           <ResultsPage 
             essay={selectedEssay} 
-            onBack={() => setActiveTab(Tab.HISTORY)} 
+            onBack={() => navigateTo(Tab.HISTORY)} 
             onTryLongResponse={handleSubmission}
+          />
+        );
+
+      case Tab.COMO_FUNCIONA:
+        return <ComoFunciona />;
+
+      case Tab.FAQ:
+        return <FAQ />;
+
+      case Tab.SOBRE_NOS:
+        return <AboutUs />;
+
+      case Tab.CONTATO:
+        return <Contact />;
+
+      case Tab.POLITICA_PRIVACIDADE:
+        return <PrivacyPolicy />;
+
+      case Tab.TERMOS_USO:
+        return <TermsOfUse />;
+
+      case Tab.BLOG:
+        return (
+          <Blog 
+            onNavigate={(slug) => navigateTo(Tab.BLOG_POST, slug)} 
+            onBackToBlog={() => navigateTo(Tab.BLOG)} 
+          />
+        );
+
+      case Tab.BLOG_POST:
+        return (
+          <Blog 
+            onNavigate={(slug) => navigateTo(Tab.BLOG_POST, slug)} 
+            activeSlug={blogPostSlug || undefined} 
+            onBackToBlog={() => navigateTo(Tab.BLOG)} 
           />
         );
         
@@ -347,7 +464,7 @@ const App: React.FC = () => {
       {/* Sidebar Component */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={(tab) => navigateTo(tab)} 
         isOpen={isSidebarOpen} 
         onClose={() => setIsSidebarOpen(false)}
         isDarkMode={isDarkMode}
@@ -357,13 +474,13 @@ const App: React.FC = () => {
         onGoHome={() => {
           setSelectedArea(null);
           setSelectedSubject(null);
-          setActiveTab(Tab.HOME);
+          navigateTo(Tab.HOME);
           setHubKey(prev => prev + 1);
         }}
       />
 
       {/* Main Content Area - Responsive Padding */}
-      <main className="md:pl-20 min-h-screen p-4 md:p-12 max-w-7xl mx-auto transition-all duration-300">
+      <main className="md:pl-20 min-h-[calc(100vh-300px)] p-4 md:p-12 max-w-7xl mx-auto transition-all duration-300">
         
         {/* Mobile Menu Trigger (Standalone) */}
         <div className="md:hidden flex items-center justify-between mb-6">
@@ -394,6 +511,11 @@ const App: React.FC = () => {
 
         {renderContent()}
       </main>
+
+      {/* Global compliance & institutional Footer */}
+      <div className="md:pl-20">
+        <Footer onNavigate={navigateTo} isDarkMode={isDarkMode} />
+      </div>
 
       <style>{`
         @keyframes fadeIn {
