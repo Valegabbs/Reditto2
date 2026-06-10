@@ -1,0 +1,5 @@
+{
+  "name": "Donome",
+  "description": "Plataforma inteligente de tutoria e correção de redações modelo ENEM utilizando IA.",
+  "requestFramePermissions": ["camera"]
+}

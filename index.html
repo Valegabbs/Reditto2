@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Donome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable manual dark mode toggling
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Outfit', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                primary: 'var(--brand-primary, #38BDF8)',
+                primaryHover: 'var(--brand-primary-hover, #0EA5E9)',
+                blue: '#38BDF8', // New Brand Color (Light Blue)
+                blueHover: '#0EA5E9',
+                blueLight: '#F0F9FF',
+                black: '#000000',
+                gray: '#F5F5F5',
+                text: '#1A1A1A',
+                // Dark Mode specific palette
+                darkBg: '#121212',
+                darkSurface: '#1E1E1E',
+                darkBorder: '#333333'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #F8F8F8;
+      }
+      /* Dark mode body background transition handled in App.tsx or CSS classes */
+      .dark body {
+        background-color: #121212;
+      }
+      
+      /* Custom Scrollbar for a cleaner look */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px; /* For horizontal scroll */
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 4px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #333;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bbb;
+      }
+
+      /* Dotted Background Pattern */
+      .bg-dots {
+        background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+      .dark .bg-dots {
+        background-image: radial-gradient(#262626 1px, transparent 1px);
+      }
+
+      /* Prism / Rainbow Glow Animation */
+      @keyframes prism-move {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      
+      .prism-box {
+        position: relative;
+        z-index: 0;
+        /* Ensure the background stays white/dark on top of the glow */
+        background-clip: padding-box; 
+      }
+      
+      .prism-box::before {
+        content: "";
+        position: absolute;
+        /* Negative inset makes it larger than the container */
+        inset: -5px; 
+        border-radius: inherit;
+        background: linear-gradient(
+          45deg, 
+          #FF0000, #FF7300, #FFFB00, #48FF00, #00FFD5, #002BFF, #7A00FF, #FF00C8, #FF0000
+        );
+        background-size: 400%;
+        z-index: -1;
+        
+        /* The "Magical Glow" Effect */
+        filter: blur(12px); 
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      
+      /* Trigger animation on Hover OR Focus-within */
+      .prism-box:hover::before,
+      .prism-box:focus-within::before {
+        opacity: 0.6; /* Soft transparency */
+        animation: prism-move 4s linear infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
